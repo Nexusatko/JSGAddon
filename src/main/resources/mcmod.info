@@ -1,0 +1,16 @@
+[
+  {
+    "modid": "jsgaddon",
+    "name": "JSGAddon",
+    "description": "Server-side addon for JSG coded for JSGCraft 2.0",
+    "version": "${version}",
+    "mcversion": "${mcversion}",
+    "url": "",
+    "updateUrl": "",
+    "authorList": ["Nexusatko", "MineDragonCZ_"],
+    "credits": "",
+    "logoFile": "",
+    "screenshots": [],
+    "dependencies": []
+  }
+]
