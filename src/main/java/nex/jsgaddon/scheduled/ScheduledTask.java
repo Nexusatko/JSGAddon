@@ -1,5 +1,6 @@
 package nex.jsgaddon.scheduled;
 
+@SuppressWarnings("unused")
 public class ScheduledTask {
     private final Runnable runnable;
     private int wait;

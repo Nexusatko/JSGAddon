@@ -13,8 +13,8 @@ public class Chat {
     @SubscribeEvent
     public void onChatEvent(ServerChatEvent chat) {
         if (chat.getMessage().equalsIgnoreCase("JSGAddon") || chat.getMessage().equalsIgnoreCase("nox")) {
-            ITextComponent prijato = chat.getComponent();
-            chat.setComponent(prijato.setStyle(new Style().setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new TextComponentString("§eJSGAddon " + JSGAddon.VERSION + " §7( §bNexusatko §8& §bMineDragonCZ_ §7)")))));
+            ITextComponent received = chat.getComponent();
+            chat.setComponent(received.setStyle(new Style().setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new TextComponentString("§eJSGAddon " + JSGAddon.VERSION + " §7( §bNexusatko §8& §bMineDragonCZ_ §7)")))));
             chat.getPlayer().sendStatusMessage(new TextComponentString("§eJSGAddon " + JSGAddon.VERSION + " §7( §bNexusatko §8& §bMineDragonCZ_ §7)"), true);
         }
     }
