@@ -6,15 +6,19 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.TextComponentString;
 import net.minecraftforge.energy.CapabilityEnergy;
+import nex.jsgaddon.JSGAddon;
 import nex.jsgaddon.utils.FindNearestTile;
-import tauri.dev.jsg.stargate.power.StargateAbstractEnergyStorage;
+import tauri.dev.jsg.stargate.power.StargateClassicEnergyStorage;
 import tauri.dev.jsg.stargate.power.StargateItemEnergyStorage;
 import tauri.dev.jsg.tileentity.stargate.StargateClassicBaseTile;
 
 import javax.annotation.Nonnull;
 import javax.annotation.ParametersAreNonnullByDefault;
+import java.util.ArrayList;
+import java.util.List;
 
 public class GateControl extends CommandBase {
 
@@ -54,52 +58,103 @@ public class GateControl extends CommandBase {
             return;
         }
         StargateClassicBaseTile casted = (StargateClassicBaseTile) tileEntity;
-        StargateAbstractEnergyStorage getEnergyStorage = (StargateAbstractEnergyStorage) casted.getCapability(CapabilityEnergy.ENERGY, null);
-
+        StargateClassicEnergyStorage energyStorage = (StargateClassicEnergyStorage) casted.getCapability(CapabilityEnergy.ENERGY, null);
 
         switch (args[0]) {
             case "energy":
-                if (getEnergyStorage == null) return;
-                ItemStack cap1 = casted.getItemHandler().getStackInSlot(4);
-                ItemStack cap2 = casted.getItemHandler().getStackInSlot(5);
-                ItemStack cap3 = casted.getItemHandler().getStackInSlot(6);
-                StargateItemEnergyStorage cen1 = (StargateItemEnergyStorage) cap1.getCapability(CapabilityEnergy.ENERGY, null);
-                StargateItemEnergyStorage cen2 = (StargateItemEnergyStorage) cap2.getCapability(CapabilityEnergy.ENERGY, null);
-                StargateItemEnergyStorage cen3 = (StargateItemEnergyStorage) cap3.getCapability(CapabilityEnergy.ENERGY, null);
-                if (args[1].equalsIgnoreCase("max")) {
-                    if (cen1 != null) {
-                        cen1.setEnergyStored(cen1.getMaxEnergyStored());
+                if (energyStorage == null) return;
+                for (int i = 4; i <= 6; i++) {
+                    ItemStack stack = casted.getItemHandler().getStackInSlot(i);
+                    if (stack.isEmpty()) continue;
+                    StargateItemEnergyStorage energy = (StargateItemEnergyStorage) stack.getCapability(CapabilityEnergy.ENERGY, null);
+                    if (energy == null) continue;
+                    switch (args[1]) {
+                        case "max":
+                            energy.setEnergyStored(energy.getMaxEnergyStored());
+                            break;
+                        case "half":
+                            energy.setEnergyStored(energy.getMaxEnergyStored() / 2);
+                            break;
+                        case "none":
+                            energy.setEnergyStored(0);
+                            break;
                     }
-                    if (cen2 != null) {
-                        cen2.setEnergyStored(cen2.getMaxEnergyStored());
-                    }
-                    if (cen3 != null) {
-                        cen3.setEnergyStored(cen3.getMaxEnergyStored());
-                    }
-                    getEnergyStorage.setEnergyStored(getEnergyStorage.getMaxEnergyStored());
-                    sender.sendMessage(new TextComponentString("Stargate's energy set to max"));
-                } else if (args[1].equalsIgnoreCase("half")) {
-                    if (cen1 != null) {
-                        cen1.setEnergyStored(cen1.getMaxEnergyStored() / 2);
-                    }
-                    if (cen2 != null) {
-                        cen2.setEnergyStored(cen2.getMaxEnergyStored() / 2);
-                    }
-                    if (cen3 != null) {
-                        cen3.setEnergyStored(cen3.getMaxEnergyStored() / 2);
-                    }
-                    getEnergyStorage.setEnergyStored((getEnergyStorage.getMaxEnergyStored() / 2));
-                    sender.sendMessage(new TextComponentString("Stargate's energy set to half"));
                 }
-                return;
+                switch (args[1]) {
+                    case "max":
+                        energyStorage.setEnergyStored(energyStorage.getMaxEnergyStored());
+                        sender.sendMessage(new TextComponentString("Stargate's energy was set to full of capacity."));
+                        break;
+                    case "half":
+                        energyStorage.setEnergyStored(energyStorage.getMaxEnergyStoredInternally() / 2);
+                        sender.sendMessage(new TextComponentString("Stargate's energy was set to half of capacity."));
+                        break;
+                    case "none":
+                        energyStorage.setEnergyStored(0);
+                        break;
+                }
+                JSGAddon.info("Energy subsystem of GateControl was used by " + sender.getName() + "!");
+                break;
             case "iris":
-                return;
-            case "set":
-            case "default":
-                sender.sendMessage(new TextComponentString("Please, choose a sub-function ( energy / iris / set )"));
+                switch (args[1]) {
+                    case "code":
+                        if (!casted.hasIris()) return;
+                        sender.sendMessage(new TextComponentString(String.valueOf(casted.getIrisCode())));
+                        break;
+                    case "type":
+                        if (!casted.hasIris()) return;
+                        sender.sendMessage(new TextComponentString(casted.getIrisType().toString()));
+                        break;
+                    case "status":
+                    case "state":
+                        if (!casted.hasIris()) return;
+                        sender.sendMessage(new TextComponentString(casted.getIrisState().toString()));
+                        break;
+                    case "toggle":
+                        if (casted.hasIris() && casted.isIrisClosed()) {
+                            casted.toggleIris();
+                            sender.sendMessage(new TextComponentString("Iris was opened."));
+                        } else if (casted.hasIris() && casted.isIrisOpened()) {
+                            casted.toggleIris();
+                            sender.sendMessage(new TextComponentString("Iris was closed."));
+                        }
+                        else if (casted.hasIris()) {
+                            sender.sendMessage(new TextComponentString("Iris is busy."));
+                        } else {
+                            sender.sendMessage(new TextComponentString("No Iris present!"));
+                        }
+                        break;
+                }
+                JSGAddon.info("Iris subsystem of GateControl was used by " + sender.getName() + "!");
+                break;
+            case "gen":
+                int amount = Integer.parseInt(args[1]);
+                casted.generateIncoming(amount, 9);
+                JSGAddon.info("Gen subsystem of GateControl was used by " + sender.getName() + "!");
+                break;
+            default:
+                sender.sendMessage(new TextComponentString("Please, choose a sub-function ( energy / iris / gen )"));
                 break;
         }
 
     }
 
+    @Nonnull
+    @Override
+    public List<String> getTabCompletions(@Nonnull MinecraftServer server, @Nonnull ICommandSender sender, String[] args, BlockPos targetPos) {
+        switch (args.length) {
+            case 1:
+                return getListOfStringsMatchingLastWord(args, "energy", "iris", "gen");
+            case 2:
+                switch (args[0]) {
+                    case "energy":
+                        return getListOfStringsMatchingLastWord(args, "max", "half", "none");
+                    case "iris":
+                        return getListOfStringsMatchingLastWord(args, "status", "state", "toggle", "type", "code");
+                }
+                break;
+
+        }
+        return new ArrayList<>();
+    }
 }

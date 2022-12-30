@@ -7,6 +7,7 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.text.TextComponentString;
 import nex.jsgaddon.utils.FindNearestTile;
+import tauri.dev.jsg.stargate.EnumIrisMode;
 import tauri.dev.jsg.stargate.EnumIrisState;
 import tauri.dev.jsg.stargate.network.StargatePos;
 import tauri.dev.jsg.tileentity.stargate.StargateAbstractBaseTile;
@@ -60,6 +61,9 @@ public class IrisBypassCommand extends CommandBase {
                 if (targetTile instanceof StargateClassicBaseTile) {
                     StargateClassicBaseTile castedTargetTile = (StargateClassicBaseTile) targetTile;
                     if (castedTargetTile.getIrisState() == EnumIrisState.CLOSED) {
+                        if (castedTargetTile.getIrisMode() == EnumIrisMode.CLOSED || castedTargetTile.getIrisMode() == EnumIrisMode.OC) {
+                            castedTargetTile.setIrisMode(EnumIrisMode.AUTO);
+                        }
                         castedTargetTile.toggleIris();
                         sender.sendMessage(new TextComponentString("Iris is now open!"));
                     } else {
