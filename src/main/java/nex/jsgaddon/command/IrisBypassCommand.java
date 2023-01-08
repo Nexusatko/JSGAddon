@@ -60,7 +60,10 @@ public class IrisBypassCommand extends CommandBase {
                 StargateAbstractBaseTile targetTile = targetGate.getTileEntity();
                 if (targetTile instanceof StargateClassicBaseTile) {
                     StargateClassicBaseTile castedTargetTile = (StargateClassicBaseTile) targetTile;
-                    if (castedTargetTile.getIrisState() == EnumIrisState.CLOSED) {
+                    if (!castedTargetTile.hasIris()) {
+                        sender.sendMessage(new TextComponentString("Iris is not present, you can enter."));
+                    }
+                    else if (castedTargetTile.getIrisState() == EnumIrisState.CLOSED) {
                         if (castedTargetTile.getIrisMode() == EnumIrisMode.CLOSED || castedTargetTile.getIrisMode() == EnumIrisMode.OC) {
                             castedTargetTile.setIrisMode(EnumIrisMode.AUTO);
                         }
