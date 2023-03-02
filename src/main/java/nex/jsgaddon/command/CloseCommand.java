@@ -50,7 +50,11 @@ public class CloseCommand extends CommandBase {
             return;
         }
         StargateClassicBaseTile casted = (StargateClassicBaseTile) tileEntity;
-        casted.attemptClose(StargateClosedReasonEnum.REQUESTED);
-        sender.sendMessage(new TextComponentString("Wormhole connection was successfully terminated."));
+        if (!casted.getStargateState().dialing() || !casted.getStargateState().idle() || casted.randomIncomingIsActive) {
+            casted.attemptClose(StargateClosedReasonEnum.REQUESTED);
+            sender.sendMessage(new TextComponentString("Wormhole connection was successfully terminated."));
+            return;
+        }
+        sender.sendMessage(new TextComponentString("Stargate is closed or dialing!"));
     }
 }

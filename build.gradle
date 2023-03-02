@@ -9,6 +9,13 @@ group = 'nex'
 version = "${mc_version}-${mod_version}"
 archivesBaseName = "${build_extrapath}jsg-addon"
 
+sourceSets {
+    main {
+        output.resourcesDir = file('build/combined')
+        java.outputDir = file('build/combined')
+    }
+}
+
 java {
     archivesBaseName = 'jsgaddon'
     toolchain.languageVersion = JavaLanguageVersion.of(8)
@@ -149,18 +156,12 @@ jar {
 
 jar.finalizedBy('reobfJar')
 
-task replaceTokens(type: Sync) {
-    from sourceSets.main.java
-    inputs.property 'version', project.mc_version.toString()
-    filter(ReplaceTokens, tokens: [VERSION: version.toString()])
-    filter(ReplaceTokens, tokens: [MCVERSION: "${project.mc_version}".toString()])
-    into "$buildDir/src"
-}
-
 processResources {
     // this will ensure that this task is redone when the versions change.
     inputs.property "version", mod_version
     inputs.property "mcversion", mc_version
+    duplicatesStrategy = DuplicatesStrategy.INCLUDE
+
 
     // replace stuff in mcmod.info, nothing else
     from(sourceSets.main.resources.srcDirs) {
@@ -176,6 +177,14 @@ processResources {
     }
 
     rename '(.+_at.cfg)', 'META-INF/$1'
+}
+
+task replaceTokens(type: Sync) {
+    from sourceSets.main.java
+    inputs.property 'version', project.mc_version.toString()
+    filter(ReplaceTokens, tokens: [VERSION: version.toString()])
+    filter(ReplaceTokens, tokens: [MCVERSION: "${project.mc_version}".toString()])
+    into "$buildDir/src"
 }
 
 tasks.withType(JavaCompile).configureEach {

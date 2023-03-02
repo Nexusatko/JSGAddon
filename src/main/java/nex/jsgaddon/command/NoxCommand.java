@@ -2,9 +2,11 @@ package nex.jsgaddon.command;
 
 import net.minecraft.command.CommandBase;
 import net.minecraft.command.ICommandSender;
+import net.minecraft.command.WrongUsageException;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.TextComponentString;
 import nex.jsgaddon.loader.JsonStargateAddress;
 import nex.jsgaddon.scheduled.ScheduledTask;
@@ -21,6 +23,7 @@ import tauri.dev.jsg.tileentity.stargate.StargateUniverseBaseTile;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;
+import java.util.List;
 
 import static nex.jsgaddon.loader.FromFile.ADDRESS_MAP;
 
@@ -56,7 +59,7 @@ public class NoxCommand extends CommandBase {
 
     @Override
     @ParametersAreNonnullByDefault
-    public void execute(MinecraftServer server, ICommandSender sender, String[] args) {
+    public void execute(MinecraftServer server, ICommandSender sender, String[] args) throws WrongUsageException {
         TileEntity tileEntity = null;
         if (args.length > 1) {
             EntityPlayer player = server.getPlayerList().getPlayerByUsername(args[1]);
@@ -82,7 +85,9 @@ public class NoxCommand extends CommandBase {
             sender.sendMessage(new TextComponentString("Invalid address name!"));
             return;
         }
-
+        if (!casted.getStargateState().idle() || casted.getDialedAddress().size() > 0) {
+            throw new WrongUsageException("Gate is busy");
+        }
         int time = 0;
         sender.sendMessage(new TextComponentString("Dialing started: " + args[0]));
         if (casted instanceof StargateUniverseBaseTile) {
@@ -105,6 +110,7 @@ public class NoxCommand extends CommandBase {
                     ScheduledTasksStatic.add(new ScheduledTask(time, () -> {
                         if (casted.canAddSymbol(symbol)) {
                             casted.addSymbolToAddressDHD(symbol);
+                            sender.sendMessage(new TextComponentString(casted.getStargateState().toString()));
                         }
                     }));
                 }
@@ -116,5 +122,12 @@ public class NoxCommand extends CommandBase {
                     casted.attemptOpenAndFail();
             }));
         }
+    }
+
+
+    @Nonnull
+    @Override
+    public List<String> getTabCompletions(@Nonnull MinecraftServer server, @Nonnull ICommandSender sender, @Nonnull String[] args, BlockPos targetPos) {
+        return getListOfStringsMatchingLastWord(args, ADDRESS_MAP.keySet());
     }
 }
