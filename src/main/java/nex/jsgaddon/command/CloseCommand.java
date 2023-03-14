@@ -50,8 +50,8 @@ public class CloseCommand extends CommandBase {
             return;
         }
         StargateClassicBaseTile casted = (StargateClassicBaseTile) tileEntity;
-        if (!casted.getStargateState().dialing() || !casted.getStargateState().idle() || casted.randomIncomingIsActive) {
-            casted.attemptClose(StargateClosedReasonEnum.REQUESTED);
+        if (!casted.getStargateState().idle() || !casted.getStargateState().dialing() || casted.randomIncomingIsActive) {
+            casted.attemptClose(StargateClosedReasonEnum.COMMAND);
             sender.sendMessage(new TextComponentString("Wormhole connection was successfully terminated."));
             return;
         }

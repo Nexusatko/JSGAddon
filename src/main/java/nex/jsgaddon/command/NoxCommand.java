@@ -106,11 +106,10 @@ public class NoxCommand extends CommandBase {
 
                 if (dialed < maxSymbols || symbol.origin()) {
                     dialed++;
-                    time += 20;
+                    time += 15;
                     ScheduledTasksStatic.add(new ScheduledTask(time, () -> {
                         if (casted.canAddSymbol(symbol)) {
                             casted.addSymbolToAddressDHD(symbol);
-                            sender.sendMessage(new TextComponentString(casted.getStargateState().toString()));
                         }
                     }));
                 }

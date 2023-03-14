@@ -2,7 +2,6 @@ package nex.jsgaddon.command;
 
 import com.google.gson.GsonBuilder;
 import net.minecraft.command.CommandBase;
-import net.minecraft.command.CommandException;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.tileentity.TileEntity;
@@ -12,6 +11,7 @@ import nex.jsgaddon.utils.FindNearestTile;
 import tauri.dev.jsg.stargate.network.SymbolTypeEnum;
 import tauri.dev.jsg.tileentity.stargate.StargateClassicBaseTile;
 
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.io.File;
 import java.io.FileWriter;
@@ -19,6 +19,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 import static nex.jsgaddon.loader.FromFile.ADDRESS_MAP;
 
@@ -31,13 +32,15 @@ public class AddAddress extends CommandBase {
         return null;
     }
 
+    @Nonnull
     @Override
     public String getName() {
         return "addaddress";
     }
 
+    @Nonnull
     @Override
-    public String getUsage(ICommandSender sender) {
+    public String getUsage(@Nonnull ICommandSender sender) {
         return "/addaddress";
     }
 
@@ -47,10 +50,8 @@ public class AddAddress extends CommandBase {
     }
 
     @Override
-    public void execute(MinecraftServer server, ICommandSender sender, String[] args) throws CommandException {
-        File configFile;
+    public void execute(@Nonnull MinecraftServer server, ICommandSender sender, @Nonnull String[] args) {
 
-        boolean pathContainsFile = false;
         File configFileOrDir = null;
         File configFile2 = new File(configFileOrDir, "config/jsgaddon/playerlist.json");
 
@@ -72,7 +73,7 @@ public class AddAddress extends CommandBase {
             return;
         }
         try {
-            write(name, casted, true, new File(configFile2.getAbsolutePath()));
+            write(name, casted, new File(configFile2.getAbsolutePath()));
             sender.sendMessage(new TextComponentString("Stargate's multi address logged under name '" + name + "'!"));
         } catch (IOException e) {
             throw new RuntimeException(e);
@@ -80,7 +81,7 @@ public class AddAddress extends CommandBase {
 
     }
 
-    public void write(String name, StargateClassicBaseTile casted, boolean pathContainsFile, File configFile2) throws IOException {
+    public void write(String name, StargateClassicBaseTile casted, File configFile2) throws IOException {
         Map<String, Map<String, ArrayList<String>>> ADDRESS_MAP_STRING = new HashMap<>();
         FileWriter writer = new FileWriter(configFile2, false);
 
@@ -90,7 +91,7 @@ public class AddAddress extends CommandBase {
             SymbolTypeEnum type = SymbolTypeEnum.valueOf(i);
             ArrayList<String> address = new ArrayList<>();
             for (int u = 0; u < 8; u++) {
-                address.add(casted.getStargateAddress(type).get(u).getEnglishName());
+                address.add(Objects.requireNonNull(casted.getStargateAddress(type)).get(u).getEnglishName());
             }
             address.add(type.getOrigin().getEnglishName());
             map.put(type.toString(), address);

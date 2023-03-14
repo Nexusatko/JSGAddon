@@ -2,9 +2,10 @@ package nex.jsgaddon.utils;
 
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.DimensionType;
+import tauri.dev.jsg.config.JSGConfig;
 import tauri.dev.jsg.config.stargate.StargateDimensionConfig;
+import tauri.dev.jsg.power.stargate.StargateEnergyRequired;
 import tauri.dev.jsg.stargate.network.StargatePos;
-import tauri.dev.jsg.stargate.power.StargateEnergyRequired;
 
 public class GetRequiredEnergy {
     public StargateEnergyRequired getEnergyRequiredToDial(StargatePos localGate, StargatePos targetGate) {
@@ -24,7 +25,7 @@ public class GetRequiredEnergy {
         if (distance < 5000) distance *= 0.8;
         else distance = 5000 * Math.log10(distance) / Math.log10(5000);
 
-        StargateEnergyRequired energyRequired = new StargateEnergyRequired(tauri.dev.jsg.config.JSGConfig.powerConfig.openingBlockToEnergyRatio, tauri.dev.jsg.config.JSGConfig.powerConfig.keepAliveBlockToEnergyRatioPerTick);
+        StargateEnergyRequired energyRequired = new StargateEnergyRequired(JSGConfig.Stargate.power.openingBlockToEnergyRatio, JSGConfig.Stargate.power.keepAliveBlockToEnergyRatioPerTick);
         StargateEnergyRequired energy;
         energy = energyRequired.mul(distance).add(StargateDimensionConfig.getCost(sourceDim, targetDim));
 

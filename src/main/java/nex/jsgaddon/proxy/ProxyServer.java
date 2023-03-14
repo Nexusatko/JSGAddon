@@ -2,11 +2,11 @@ package nex.jsgaddon.proxy;
 
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.util.text.translation.I18n;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPostInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 
+@SuppressWarnings("unused")
 public class ProxyServer implements IProxy {
     @Override
     public void preInit(FMLPreInitializationEvent event) {
@@ -25,7 +25,7 @@ public class ProxyServer implements IProxy {
 
     @Override
     public String localize(String unlocalized, Object... args) {
-        return I18n.translateToLocalFormatted(unlocalized, args);
+        return net.minecraft.client.resources.I18n.format(unlocalized, args);
     }
 
     @Override

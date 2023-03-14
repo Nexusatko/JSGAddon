@@ -47,7 +47,7 @@ public class JSGAddon {
     }
 
     @Mod.EventHandler
-    public void preInit(FMLPreInitializationEvent event) {
+    public void preInit(FMLPreInitializationEvent event) throws IOException {
         LOGGER = event.getModLog();
         JSGAddon.proxy.preInit(event);
         FromFile.load(event.getModConfigurationDirectory());
@@ -59,7 +59,7 @@ public class JSGAddon {
     @Mod.EventHandler
     public void init(FMLInitializationEvent event) {
         if (!Loader.isModLoaded("jsg")) {
-            throw new LoaderException("JSG mod is not present, JSGAddon is useless without JSG Mod.");
+            throw new LoaderException("JSG mod is required for JSGAddon.");
         }
         JSGAddon.proxy.init(event);
     }

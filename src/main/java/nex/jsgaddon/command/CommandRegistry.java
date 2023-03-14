@@ -14,7 +14,8 @@ public class CommandRegistry {
             new CloseCommand(),
             new CheckAddress(),
             new AddAddress(),
-            new GateControl()
+            new GateControl(),
+            new Beam()
     );
 
     public static void register(FMLServerStartingEvent event) {

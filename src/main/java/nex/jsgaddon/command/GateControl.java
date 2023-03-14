@@ -11,8 +11,8 @@ import net.minecraft.util.text.TextComponentString;
 import net.minecraftforge.energy.CapabilityEnergy;
 import nex.jsgaddon.JSGAddon;
 import nex.jsgaddon.utils.FindNearestTile;
-import tauri.dev.jsg.stargate.power.StargateClassicEnergyStorage;
-import tauri.dev.jsg.stargate.power.StargateItemEnergyStorage;
+import tauri.dev.jsg.power.stargate.StargateClassicEnergyStorage;
+import tauri.dev.jsg.power.stargate.StargateItemEnergyStorage;
 import tauri.dev.jsg.tileentity.stargate.StargateClassicBaseTile;
 
 import javax.annotation.Nonnull;

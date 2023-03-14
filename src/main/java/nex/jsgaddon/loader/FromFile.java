@@ -7,6 +7,7 @@ import tauri.dev.jsg.stargate.network.SymbolTypeEnum;
 
 import java.io.*;
 import java.lang.reflect.Type;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -17,22 +18,27 @@ public class FromFile {
     public static File configFile;
     private static Map<String, Map<String, ArrayList<String>>> ADDRESS_MAP_STRING = new HashMap<>();
 
-    public static void reload() {
+    public static void reload() throws IOException {
         load(configFile, true);
     }
 
-    public static void load(File configDir) {
+    public static void load(File configDir) throws IOException {
+        if (!Files.exists(configDir.toPath().resolveSibling("config/jsgaddon"))) {
+            Files.createDirectory(configDir.toPath().resolveSibling("config/jsgaddon"));
+            JSGAddon.info("Config directory created!");
+        }
         load(configDir, false);
     }
 
-    public static void load(File configFileOrDir, boolean pathContainsFile) {
+    public static void load(File configFileOrDir, boolean pathContainsFile) throws IOException {
         ADDRESS_MAP.clear();
         ADDRESS_MAP_STRING.clear();
-        if (!pathContainsFile)
+        if (!pathContainsFile) {
             configFile = new File(configFileOrDir, "jsgaddon/addresslist.json");
-        else
+        }
+        else {
             configFile = configFileOrDir;
-
+        }
         try {
             Type mapType = new TypeToken<Map<String, Map<String, ArrayList<String>>>>() {
             }.getType();
@@ -94,7 +100,7 @@ public class FromFile {
             map.put(type.toString(), address);
         }
 
-        ADDRESS_MAP_STRING.put("Example address", map);
+        ADDRESS_MAP_STRING.put("Example", map);
 
         writer.write(new GsonBuilder().setPrettyPrinting().create().toJson(ADDRESS_MAP_STRING));
         writer.close();

@@ -97,7 +97,7 @@ repositories {
 
     maven {
         // location of the maven that hosts JEI files
-        name = "Progwml6 maven"
+        name = "Progwml6 Maven"
         url = "https://dvs1.progwml6.com/files/maven/"
     }
 
@@ -109,22 +109,18 @@ repositories {
 }
 
 dependencies {
-    // Specify the version of Minecraft to use. If this is any group other than 'net.minecraft' it is assumed
-    // that the dep is a ForgeGradle 'patcher' dependency, and its patches will be applied.
-    // The userdev artifact is a special name and will get all sorts of transformations applied to it.
     minecraft 'net.minecraftforge:forge:1.12.2-14.23.5.2860'
 
-    implementation fg.deobf("cofh:RedstoneFlux:${rf_mc_version}-${rf_version}:universal")
-    implementation fg.deobf("cofh:CoFHCore:${mc_version}-${cofh_core_version}:universal")
+    //implementation fg.deobf("cofh:RedstoneFlux:${rf_mc_version}-${rf_version}:universal")
+    //implementation fg.deobf("cofh:CoFHCore:${mc_version}-${cofh_core_version}:universal")
 
-    compileOnly fg.deobf("mezz.jei:jei_${mc_version}:${jei_version}:api")
-    runtimeOnly fg.deobf("mezz.jei:jei_${mc_version}:${jei_version}")
+    //compileOnly fg.deobf("mezz.jei:jei_${mc_version}:${jei_version}:api")
+    //runtimeOnly fg.deobf("mezz.jei:jei_${mc_version}:${jei_version}")
 
     compileOnly "li.cil.oc:OpenComputers:MC1.12.2-1.7.5.213:api"
-    // compileOnly 'net.industrial-craft:industrialcraft-2:2.1.470-experimental:api'
     compileOnly 'io.github.CDAGaming:DiscordIPC:0.6.0'
 
-    implementation files('D:\\IdeaProjects\\Sources\\jsg-core-1.12.2-4.11.0.0.jar')
+    implementation files('D:\\IdeaProjects\\Sources\\jsg-1.12.2-4.11.0.5.jar')
 
     // Real mod deobf dependency examples - these get remapped to your current mappings
     // compileOnly fg.deobf("mezz.jei:jei-${mc_version}:${jei_version}:api") // Adds JEI API as a compile dependency

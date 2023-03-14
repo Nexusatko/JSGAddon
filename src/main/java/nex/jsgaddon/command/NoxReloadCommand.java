@@ -8,6 +8,7 @@ import nex.jsgaddon.loader.FromFile;
 
 import javax.annotation.Nonnull;
 import javax.annotation.ParametersAreNonnullByDefault;
+import java.io.IOException;
 
 public class NoxReloadCommand extends CommandBase {
     @Override
@@ -31,7 +32,12 @@ public class NoxReloadCommand extends CommandBase {
     @Override
     @ParametersAreNonnullByDefault
     public void execute(MinecraftServer server, ICommandSender sender, String[] args) {
-        FromFile.reload();
+        try {
+            FromFile.reload();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
         sender.sendMessage(new TextComponentString("Reloaded!"));
+
     }
 }
