@@ -53,7 +53,7 @@ public class AddAddress extends CommandBase {
     public void execute(@Nonnull MinecraftServer server, ICommandSender sender, @Nonnull String[] args) {
 
         File configFileOrDir = null;
-        File configFile2 = new File(configFileOrDir, "config/jsgaddon/playerlist.json");
+        File configFile2 = new File(configFileOrDir, "config/jsgaddon/addaddress.json");
 
         TileEntity tileEntity = FindNearestTile.runByCLass(sender.getEntityWorld(), sender.getPosition(), StargateClassicBaseTile.class, 20, 20);
         if (tileEntity == null) {
