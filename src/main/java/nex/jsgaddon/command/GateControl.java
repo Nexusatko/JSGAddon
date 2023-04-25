@@ -78,6 +78,8 @@ public class GateControl extends CommandBase {
                         case "none":
                             energy.setEnergyStored(0);
                             break;
+                        case "default":
+                            return;
                     }
                 }
                 switch (args[1]) {
@@ -92,6 +94,8 @@ public class GateControl extends CommandBase {
                     case "none":
                         energyStorage.setEnergyStored(0);
                         break;
+                    case "default":
+                        return;
                 }
                 JSGAddon.info("Energy subsystem of GateControl was used by " + sender.getName() + "!");
                 break;
@@ -124,6 +128,8 @@ public class GateControl extends CommandBase {
                             sender.sendMessage(new TextComponentString("No Iris present!"));
                         }
                         break;
+                    case "default":
+                        return;
                 }
                 JSGAddon.info("Iris subsystem of GateControl was used by " + sender.getName() + "!");
                 break;

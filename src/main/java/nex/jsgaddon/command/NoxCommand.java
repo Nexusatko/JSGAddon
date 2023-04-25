@@ -115,10 +115,12 @@ public class NoxCommand extends CommandBase {
                 }
             }
             ScheduledTasksStatic.add(new ScheduledTask(time + 40, () -> {
-                if (casted instanceof StargatePegasusBaseTile)
+                if (casted instanceof StargatePegasusBaseTile) {
+                    casted.addSymbolToAddressDHD(casted.getSymbolType().getOrigin());
                     casted.addSymbolToAddressDHD(casted.getSymbolType().getBRB());
-                else
+                } else {
                     casted.attemptOpenAndFail();
+                }
             }));
         }
     }
