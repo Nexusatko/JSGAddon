@@ -1,6 +1,5 @@
 package nex.jsgaddon.command;
 
-import net.minecraft.command.CommandBase;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.text.TextComponentString;
@@ -10,7 +9,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.ParametersAreNonnullByDefault;
 import java.io.IOException;
 
-public class NoxReloadCommand extends CommandBase {
+public class NoxReloadCommand extends AbstractJSGACommand {
     @Override
     @Nonnull
     public String getName() {
@@ -21,7 +20,19 @@ public class NoxReloadCommand extends CommandBase {
     @Nonnull
     @ParametersAreNonnullByDefault
     public String getUsage(ICommandSender sender) {
-        return "/now-reload";
+        return "now-reload";
+    }
+
+    @Nonnull
+    @Override
+    public String getDescription() {
+        return "Reloads a address list from addresslist.json.";
+    }
+
+    @Nonnull
+    @Override
+    public String getGeneralUsage() {
+        return "nox-reload";
     }
 
     @Override
@@ -37,7 +48,7 @@ public class NoxReloadCommand extends CommandBase {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-        sender.sendMessage(new TextComponentString("Reloaded!"));
+        ((JSGACommand) baseCommand).sendSuccessMess(sender,new TextComponentString("Reloaded!"));
 
     }
 }

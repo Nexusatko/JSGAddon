@@ -1,6 +1,5 @@
-package nex.jsgaddon.command;
+package nex.jsgaddon.command.stargate;
 
-import net.minecraft.command.CommandBase;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
@@ -10,9 +9,11 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.TextComponentString;
 import net.minecraftforge.energy.CapabilityEnergy;
 import nex.jsgaddon.JSGAddon;
+import nex.jsgaddon.command.AbstractJSGACommand;
+import nex.jsgaddon.command.JSGACommand;
 import nex.jsgaddon.utils.FindNearestTile;
-import tauri.dev.jsg.power.stargate.StargateClassicEnergyStorage;
-import tauri.dev.jsg.power.stargate.StargateItemEnergyStorage;
+import tauri.dev.jsg.power.general.ItemEnergyStorage;
+import tauri.dev.jsg.power.general.LargeEnergyStorage;
 import tauri.dev.jsg.tileentity.stargate.StargateClassicBaseTile;
 
 import javax.annotation.Nonnull;
@@ -20,7 +21,9 @@ import javax.annotation.ParametersAreNonnullByDefault;
 import java.util.ArrayList;
 import java.util.List;
 
-public class GateControl extends CommandBase {
+import static net.minecraft.command.CommandBase.getListOfStringsMatchingLastWord;
+
+public class GateControl extends AbstractJSGACommand {
 
     @Override
     @Nonnull
@@ -28,11 +31,16 @@ public class GateControl extends CommandBase {
         return "gate";
     }
 
-    @Override
-    @ParametersAreNonnullByDefault
     @Nonnull
-    public String getUsage(ICommandSender sender) {
-        return "/gate";
+    @Override
+    public String getDescription() {
+        return "Controls the nearest gate within your radius";
+    }
+
+    @Nonnull
+    @Override
+    public String getGeneralUsage() {
+        return "gate <energy/iris/gen> (Just tab it)";
     }
 
     @Override
@@ -49,16 +57,17 @@ public class GateControl extends CommandBase {
             if (player != null) {
                 tileEntity = FindNearestTile.runByCLass(player.getEntityWorld(), player.getPosition(), StargateClassicBaseTile.class, 20, 20);
             } else {
-                sender.sendMessage(new TextComponentString("Player is either invalid or not online."));
+                baseCommand.sendErrorMess(sender, "Player is either invalid or not online.");
             }
         } else {
             tileEntity = FindNearestTile.runByCLass(sender.getEntityWorld(), sender.getPosition(), StargateClassicBaseTile.class, 20, 20);
         }
         if (tileEntity == null) {
+            baseCommand.sendErrorMess(sender, "Can't find Stargate in your radius.");
             return;
         }
         StargateClassicBaseTile casted = (StargateClassicBaseTile) tileEntity;
-        StargateClassicEnergyStorage energyStorage = (StargateClassicEnergyStorage) casted.getCapability(CapabilityEnergy.ENERGY, null);
+        LargeEnergyStorage energyStorage = (LargeEnergyStorage) casted.getCapability(CapabilityEnergy.ENERGY, null);
 
         switch (args[0]) {
             case "energy":
@@ -66,7 +75,7 @@ public class GateControl extends CommandBase {
                 for (int i = 4; i <= 6; i++) {
                     ItemStack stack = casted.getItemHandler().getStackInSlot(i);
                     if (stack.isEmpty()) continue;
-                    StargateItemEnergyStorage energy = (StargateItemEnergyStorage) stack.getCapability(CapabilityEnergy.ENERGY, null);
+                    ItemEnergyStorage energy = (ItemEnergyStorage) stack.getCapability(CapabilityEnergy.ENERGY, null);
                     if (energy == null) continue;
                     switch (args[1]) {
                         case "max":
@@ -85,11 +94,11 @@ public class GateControl extends CommandBase {
                 switch (args[1]) {
                     case "max":
                         energyStorage.setEnergyStored(energyStorage.getMaxEnergyStored());
-                        sender.sendMessage(new TextComponentString("Stargate's energy was set to full of capacity."));
+                        baseCommand.sendSuccessMess(sender, "Stargate's energy was set to full of capacity.");
                         break;
                     case "half":
                         energyStorage.setEnergyStored(energyStorage.getMaxEnergyStoredInternally() / 2);
-                        sender.sendMessage(new TextComponentString("Stargate's energy was set to half of capacity."));
+                        ((JSGACommand) baseCommand).sendSuccessMess(sender, new TextComponentString("Stargate's energy was set to half of capacity."));
                         break;
                     case "none":
                         energyStorage.setEnergyStored(0);
@@ -103,29 +112,29 @@ public class GateControl extends CommandBase {
                 switch (args[1]) {
                     case "code":
                         if (!casted.hasIris()) return;
-                        sender.sendMessage(new TextComponentString(String.valueOf(casted.getIrisCode())));
+                        ((JSGACommand) baseCommand).sendInfoMess(sender, new TextComponentString(String.valueOf(casted.getIrisCode())));
                         break;
                     case "type":
                         if (!casted.hasIris()) return;
-                        sender.sendMessage(new TextComponentString(casted.getIrisType().toString()));
+                        ((JSGACommand) baseCommand).sendInfoMess(sender, new TextComponentString(casted.getIrisType().toString()));
+
                         break;
                     case "status":
                     case "state":
                         if (!casted.hasIris()) return;
-                        sender.sendMessage(new TextComponentString(casted.getIrisState().toString()));
+                        ((JSGACommand) baseCommand).sendInfoMess(sender, new TextComponentString(casted.getIrisState().toString()));
                         break;
                     case "toggle":
                         if (casted.hasIris() && casted.isIrisClosed()) {
                             casted.toggleIris();
-                            sender.sendMessage(new TextComponentString("Iris was opened."));
+                            ((JSGACommand) baseCommand).sendSuccessMess(sender, new TextComponentString("Iris was opened."));
                         } else if (casted.hasIris() && casted.isIrisOpened()) {
                             casted.toggleIris();
-                            sender.sendMessage(new TextComponentString("Iris was closed."));
-                        }
-                        else if (casted.hasIris()) {
-                            sender.sendMessage(new TextComponentString("Iris is busy."));
+                            ((JSGACommand) baseCommand).sendSuccessMess(sender, new TextComponentString("Iris was closed."));
+                        } else if (casted.hasIris()) {
+                            ((JSGACommand) baseCommand).sendErrorMess(sender, new TextComponentString("Iris is busy."));
                         } else {
-                            sender.sendMessage(new TextComponentString("No Iris present!"));
+                            ((JSGACommand) baseCommand).sendErrorMess(sender, new TextComponentString("No Iris present!"));
                         }
                         break;
                     case "default":
@@ -139,7 +148,7 @@ public class GateControl extends CommandBase {
                 JSGAddon.info("Gen subsystem of GateControl was used by " + sender.getName() + "!");
                 break;
             default:
-                sender.sendMessage(new TextComponentString("Please, choose a sub-function ( energy / iris / gen )"));
+                baseCommand.sendUsageMess(sender, this);
                 break;
         }
 

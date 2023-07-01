@@ -2,6 +2,7 @@ import org.apache.tools.ant.filters.ReplaceTokens
 
 plugins {
     id 'net.minecraftforge.gradle' version '5.1.+'
+    id "org.ajoberstar.grgit" version "3.1.1"
 }
 
 
@@ -105,8 +106,17 @@ repositories {
         name = "OpenComputers Maven"
         url = "https://maven.cil.li/"
     }
+    maven {
+        name = "JitPack"
+        url =  "https://jitpack.io" }
+    maven {
+        name = "CommonCodec"
+        url = "https://mvnrepository.com/artifact/org.apache.httpcomponents/httpclient"
+    }
+
     jcenter()
 }
+
 
 dependencies {
     minecraft 'net.minecraftforge:forge:1.12.2-14.23.5.2860'
@@ -118,10 +128,13 @@ dependencies {
     //runtimeOnly fg.deobf("mezz.jei:jei_${mc_version}:${jei_version}")
 
     compileOnly "li.cil.oc:OpenComputers:MC1.12.2-1.7.5.213:api"
-    compileOnly 'io.github.CDAGaming:DiscordIPC:0.6.0'
 
-    implementation files('D:\\IdeaProjects\\Sources\\jsg-1.12.2-4.11.0.5.jar')
-
+    compileOnly files('E:\\IdeaProjects\\Sources\\jsg-1.12.2-4.11.1.0-lmao.jar')
+    /*implementation('org.gradle.Tau-ri-Dev:jsg') {
+        version {
+            branch = 'master'
+        }
+    }*/
     // Real mod deobf dependency examples - these get remapped to your current mappings
     // compileOnly fg.deobf("mezz.jei:jei-${mc_version}:${jei_version}:api") // Adds JEI API as a compile dependency
     // runtimeOnly fg.deobf("mezz.jei:jei-${mc_version}:${jei_version}") // Adds the full JEI mod as a runtime dependency
@@ -133,6 +146,7 @@ dependencies {
     // For more info...
     // http://www.gradle.org/docs/current/userguide/artifact_dependencies_tutorial.html
     // http://www.gradle.org/docs/current/userguide/dependency_management.html
+
 }
 
 // Example for how to get properties into the manifest for reading at runtime.
@@ -175,7 +189,7 @@ processResources {
     rename '(.+_at.cfg)', 'META-INF/$1'
 }
 
-task replaceTokens(type: Sync) {
+tasks.register('replaceTokens', Sync) {
     from sourceSets.main.java
     inputs.property 'version', project.mc_version.toString()
     filter(ReplaceTokens, tokens: [VERSION: version.toString()])

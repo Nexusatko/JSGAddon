@@ -1,11 +1,12 @@
-package nex.jsgaddon.command;
+package nex.jsgaddon.command.stargate;
 
-import net.minecraft.command.CommandBase;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.text.TextComponentString;
+import nex.jsgaddon.command.AbstractJSGACommand;
+import nex.jsgaddon.command.JSGACommand;
 import nex.jsgaddon.utils.FindNearestTile;
 import tauri.dev.jsg.stargate.EnumIrisMode;
 import tauri.dev.jsg.stargate.EnumIrisState;
@@ -16,18 +17,23 @@ import tauri.dev.jsg.tileentity.stargate.StargateClassicBaseTile;
 import javax.annotation.Nonnull;
 import javax.annotation.ParametersAreNonnullByDefault;
 
-public class IrisBypassCommand extends CommandBase {
+public class IrisBypassCommand extends AbstractJSGACommand {
     @Override
     @Nonnull
     public String getName() {
         return "iris";
     }
 
-    @Override
     @Nonnull
-    @ParametersAreNonnullByDefault
-    public String getUsage(ICommandSender sender) {
-        return "/iris";
+    @Override
+    public String getDescription() {
+        return "Opens iris on the destination gate.";
+    }
+
+    @Nonnull
+    @Override
+    public String getGeneralUsage() {
+        return "iris";
     }
 
     @Override
@@ -44,12 +50,13 @@ public class IrisBypassCommand extends CommandBase {
             if (player != null) {
                 tileEntity = FindNearestTile.runByCLass(player.getEntityWorld(), player.getPosition(), StargateClassicBaseTile.class, 20, 20);
             } else {
-                sender.sendMessage(new TextComponentString("Player is either invalid or not online."));
+                ((JSGACommand) baseCommand).sendErrorMess(sender, new TextComponentString("Player is either invalid or not online."));
             }
         } else {
             tileEntity = FindNearestTile.runByCLass(sender.getEntityWorld(), sender.getPosition(), StargateClassicBaseTile.class, 20, 20);
         }
         if (tileEntity == null) {
+            baseCommand.sendErrorMess(sender, "Can't find Stargate in your radius.");
             return;
         }
         if (tileEntity instanceof StargateClassicBaseTile) {
@@ -61,16 +68,15 @@ public class IrisBypassCommand extends CommandBase {
                 if (targetTile instanceof StargateClassicBaseTile) {
                     StargateClassicBaseTile castedTargetTile = (StargateClassicBaseTile) targetTile;
                     if (!castedTargetTile.hasIris()) {
-                        sender.sendMessage(new TextComponentString("Iris is not present, you can enter."));
-                    }
-                    else if (castedTargetTile.getIrisState() == EnumIrisState.CLOSED) {
+                        ((JSGACommand) baseCommand).sendErrorMess(sender, new TextComponentString("Iris is not present, you can enter."));
+                    } else if (castedTargetTile.getIrisState() == EnumIrisState.CLOSED) {
                         if (castedTargetTile.getIrisMode() == EnumIrisMode.CLOSED || castedTargetTile.getIrisMode() == EnumIrisMode.OC) {
                             castedTargetTile.setIrisMode(EnumIrisMode.AUTO);
                         }
                         castedTargetTile.toggleIris();
-                        sender.sendMessage(new TextComponentString("Iris is now open!"));
+                        ((JSGACommand) baseCommand).sendSuccessMess(sender, new TextComponentString("Iris is now open!"));
                     } else {
-                        sender.sendMessage(new TextComponentString("Iris is already open!"));
+                        ((JSGACommand) baseCommand).sendErrorMess(sender, new TextComponentString("Iris is already open!"));
                     }
                 }
             }

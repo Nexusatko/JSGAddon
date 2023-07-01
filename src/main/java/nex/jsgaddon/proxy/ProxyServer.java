@@ -5,12 +5,13 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPostInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
+import nex.jsgaddon.loader.FromFile;
 
 @SuppressWarnings("unused")
 public class ProxyServer implements IProxy {
     @Override
     public void preInit(FMLPreInitializationEvent event) {
-
+        FromFile.load(event.getModConfigurationDirectory());
     }
 
     @Override

@@ -1,11 +1,10 @@
-package nex.jsgaddon.command;
+package nex.jsgaddon.command.stargate;
 
 import com.google.gson.GsonBuilder;
-import net.minecraft.command.CommandBase;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.text.TextComponentString;
+import nex.jsgaddon.command.AbstractJSGACommand;
 import nex.jsgaddon.loader.JsonStargateAddress;
 import nex.jsgaddon.utils.FindNearestTile;
 import tauri.dev.jsg.stargate.network.SymbolTypeEnum;
@@ -23,7 +22,7 @@ import java.util.Objects;
 
 import static nex.jsgaddon.loader.FromFile.ADDRESS_MAP;
 
-public class AddAddress extends CommandBase {
+public class AddAddress extends AbstractJSGACommand {
     @Nullable
     private static JsonStargateAddress findAddress(String addressName, SymbolTypeEnum symbolType) {
         if (ADDRESS_MAP.get(addressName) != null) {
@@ -40,8 +39,14 @@ public class AddAddress extends CommandBase {
 
     @Nonnull
     @Override
-    public String getUsage(@Nonnull ICommandSender sender) {
-        return "/addaddress";
+    public String getDescription() {
+        return "Adds address under defined name into playerlist.json";
+    }
+
+    @Nonnull
+    @Override
+    public String getGeneralUsage() {
+        return "addaddress <name of address>";
     }
 
     @Override
@@ -57,11 +62,11 @@ public class AddAddress extends CommandBase {
 
         TileEntity tileEntity = FindNearestTile.runByCLass(sender.getEntityWorld(), sender.getPosition(), StargateClassicBaseTile.class, 20, 20);
         if (tileEntity == null) {
-            sender.sendMessage(new TextComponentString("Can't find Stargate in your radius."));
+            baseCommand.sendErrorMess(sender, "Can't find Stargate in your radius.");
             return;
         }
         if (args.length < 1) {
-            sender.sendMessage(new TextComponentString("Enter an new address name!"));
+            baseCommand.sendUsageMess(sender, this);
             return;
         }
         StargateClassicBaseTile casted = (StargateClassicBaseTile) tileEntity;
@@ -69,12 +74,12 @@ public class AddAddress extends CommandBase {
         String name = args[0];
         JsonStargateAddress foundAddress = findAddress(name.replace("-", " "), casted.getSymbolType());
         if (foundAddress != null) {
-            sender.sendMessage(new TextComponentString("This Stargate is already logged!"));
+            baseCommand.sendErrorMess(sender, "This name is already used!");
             return;
         }
         try {
             write(name, casted, new File(configFile2.getAbsolutePath()));
-            sender.sendMessage(new TextComponentString("Stargate's multi address logged under name '" + name + "'!"));
+            baseCommand.sendSuccessMess(sender, "Stargate's address types logged under name '" + name + "'!");
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

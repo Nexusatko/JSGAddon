@@ -1,11 +1,11 @@
-package nex.jsgaddon.command;
+package nex.jsgaddon.command.stargate;
 
-import net.minecraft.command.CommandBase;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.text.TextComponentString;
+import nex.jsgaddon.command.AbstractJSGACommand;
 import nex.jsgaddon.utils.FindNearestTile;
 import tauri.dev.jsg.stargate.StargateClosedReasonEnum;
 import tauri.dev.jsg.tileentity.stargate.StargateClassicBaseTile;
@@ -13,18 +13,23 @@ import tauri.dev.jsg.tileentity.stargate.StargateClassicBaseTile;
 import javax.annotation.Nonnull;
 import javax.annotation.ParametersAreNonnullByDefault;
 
-public class CloseCommand extends CommandBase {
+public class CloseCommand extends AbstractJSGACommand {
     @Override
     @Nonnull
     public String getName() {
         return "close";
     }
 
-    @Override
     @Nonnull
-    @ParametersAreNonnullByDefault
-    public String getUsage(ICommandSender sender) {
-        return "/close";
+    @Override
+    public String getDescription() {
+        return "Closes the nearest gate";
+    }
+
+    @Nonnull
+    @Override
+    public String getGeneralUsage() {
+        return "close";
     }
 
     @Override
@@ -47,7 +52,9 @@ public class CloseCommand extends CommandBase {
             tileEntity = FindNearestTile.runByCLass(sender.getEntityWorld(), sender.getPosition(), StargateClassicBaseTile.class, 20, 20);
         }
         if (tileEntity == null) {
+            baseCommand.sendErrorMess(sender, "Can't find Stargate in your radius.");
             return;
+
         }
         StargateClassicBaseTile casted = (StargateClassicBaseTile) tileEntity;
         if (!casted.getStargateState().idle() || !casted.getStargateState().dialing() || casted.randomIncomingIsActive) {

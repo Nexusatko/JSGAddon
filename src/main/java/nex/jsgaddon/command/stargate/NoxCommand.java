@@ -1,13 +1,13 @@
-package nex.jsgaddon.command;
+package nex.jsgaddon.command.stargate;
 
-import net.minecraft.command.CommandBase;
 import net.minecraft.command.ICommandSender;
-import net.minecraft.command.WrongUsageException;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.TextComponentString;
+import nex.jsgaddon.command.AbstractJSGACommand;
+import nex.jsgaddon.command.JSGACommand;
 import nex.jsgaddon.loader.JsonStargateAddress;
 import nex.jsgaddon.scheduled.ScheduledTask;
 import nex.jsgaddon.scheduled.ScheduledTasksStatic;
@@ -25,11 +25,12 @@ import javax.annotation.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;
 import java.util.List;
 
+import static net.minecraft.command.CommandBase.getListOfStringsMatchingLastWord;
 import static nex.jsgaddon.loader.FromFile.ADDRESS_MAP;
 
 
 @SuppressWarnings("DuplicatedCode")
-public class NoxCommand extends CommandBase {
+public class NoxCommand extends AbstractJSGACommand {
 
     @Nullable
     private static JsonStargateAddress findAddress(String addressName, SymbolTypeEnum symbolType) {
@@ -45,11 +46,16 @@ public class NoxCommand extends CommandBase {
         return "nox";
     }
 
-    @Override
-    @ParametersAreNonnullByDefault
     @Nonnull
-    public String getUsage(ICommandSender sender) {
-        return "/nox";
+    @Override
+    public String getDescription() {
+        return "Dials the nearest gate to you or optionally defined player to the chosen destination.";
+    }
+
+    @Nonnull
+    @Override
+    public String getGeneralUsage() {
+        return "nox <name> [nick]";
     }
 
     @Override
@@ -59,37 +65,38 @@ public class NoxCommand extends CommandBase {
 
     @Override
     @ParametersAreNonnullByDefault
-    public void execute(MinecraftServer server, ICommandSender sender, String[] args) throws WrongUsageException {
+    public void execute(MinecraftServer server, ICommandSender sender, String[] args) {
         TileEntity tileEntity = null;
         if (args.length > 1) {
             EntityPlayer player = server.getPlayerList().getPlayerByUsername(args[1]);
             if (player != null) {
                 tileEntity = FindNearestTile.runByCLass(player.getEntityWorld(), player.getPosition(), StargateClassicBaseTile.class, 20, 20);
             } else {
-                sender.sendMessage(new TextComponentString("Player is either invalid or not online."));
+                ((JSGACommand) baseCommand).sendErrorMess(sender, new TextComponentString("Player is either invalid or not online."));
             }
         } else {
             tileEntity = FindNearestTile.runByCLass(sender.getEntityWorld(), sender.getPosition(), StargateClassicBaseTile.class, 20, 20);
         }
         if (tileEntity == null) {
+            baseCommand.sendErrorMess(sender, "Can't find Stargate in your radius.");
             return;
         }
         if (args.length < 1) {
-            sender.sendMessage(new TextComponentString("Enter an address name!"));
+            baseCommand.sendUsageMess(sender, this);
             return;
         }
         StargateClassicBaseTile casted = (StargateClassicBaseTile) tileEntity;
         JsonStargateAddress foundAddress = findAddress(args[0].replace("-", " "), casted.getSymbolType());
 
         if (foundAddress == null) {
-            sender.sendMessage(new TextComponentString("Invalid address name!"));
+            ((JSGACommand) baseCommand).sendErrorMess(sender, new TextComponentString("Invalid address name!"));
             return;
         }
         if (!casted.getStargateState().idle() || casted.getDialedAddress().size() > 0) {
-            throw new WrongUsageException("Gate is busy");
+            baseCommand.sendErrorMess(sender, "Gate is busy!");
         }
         int time = 0;
-        sender.sendMessage(new TextComponentString("Dialing started: " + args[0]));
+        ((JSGACommand) baseCommand).sendRunningMess(sender, new TextComponentString("Dialing started: " + args[0]));
         if (casted instanceof StargateUniverseBaseTile) {
             ((StargateUniverseBaseTile) casted).dialAddress(foundAddress.toImmutable(), foundAddress.size());
         } else {

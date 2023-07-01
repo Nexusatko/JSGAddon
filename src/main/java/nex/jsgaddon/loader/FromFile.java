@@ -22,12 +22,17 @@ public class FromFile {
         load(configFile, true);
     }
 
-    public static void load(File configDir) throws IOException {
-        if (!Files.exists(configDir.toPath().resolveSibling("config/jsgaddon"))) {
-            Files.createDirectory(configDir.toPath().resolveSibling("config/jsgaddon"));
-            JSGAddon.info("Config directory created!");
+    public static void load(File configDir) {
+        try {
+            if (!Files.exists(configDir.toPath().resolveSibling("config/jsgaddon"))) {
+                Files.createDirectory(configDir.toPath().resolveSibling("config/jsgaddon"));
+                JSGAddon.info("Config directory created!");
+            }
+            load(configDir, false);
         }
-        load(configDir, false);
+        catch (Exception e){
+            JSGAddon.logger.error(e);
+        }
     }
 
     public static void load(File configFileOrDir, boolean pathContainsFile) throws IOException {
