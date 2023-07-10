@@ -36,8 +36,8 @@ public class CommandTest extends AbstractJSGACommand {
         if(args.length > 0){
             StringBuilder sb = new StringBuilder();
             for(String s : args)
-                sb.append(s).append(" ");
-            baseCommand.sendInfoMess(sender, sb.toString().replaceAll("&", "§"));
+                sb.append(s).append(' ');
+            baseCommand.sendInfoMess(sender, sb.toString().replace("&", "§"));
         }
         else{
             baseCommand.sendUsageMess(sender, this);

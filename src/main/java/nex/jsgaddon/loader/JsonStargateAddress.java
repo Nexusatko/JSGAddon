@@ -24,8 +24,8 @@ public class JsonStargateAddress extends StargateAddressDynamic {
         StringBuilder s = new StringBuilder();
         int i = 0;
         for (SymbolInterface symbol : address) {
-            s.append("'").append(symbol.getEnglishName()).append("'");
-            if (++i < address.size()) s.append(",");
+            s.append('\'').append(symbol.getEnglishName()).append('\'');
+            if (++i < address.size()) s.append(',');
         }
         return s.toString();
     }

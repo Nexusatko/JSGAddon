@@ -15,14 +15,6 @@ public class NoxReloadCommand extends AbstractJSGACommand {
     public String getName() {
         return "nox-reload";
     }
-
-    @Override
-    @Nonnull
-    @ParametersAreNonnullByDefault
-    public String getUsage(ICommandSender sender) {
-        return "now-reload";
-    }
-
     @Nonnull
     @Override
     public String getDescription() {

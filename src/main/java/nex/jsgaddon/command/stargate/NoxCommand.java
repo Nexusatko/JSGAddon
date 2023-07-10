@@ -12,6 +12,7 @@ import nex.jsgaddon.loader.JsonStargateAddress;
 import nex.jsgaddon.scheduled.ScheduledTask;
 import nex.jsgaddon.scheduled.ScheduledTasksStatic;
 import nex.jsgaddon.utils.FindNearestTile;
+import tauri.dev.jsg.stargate.StargateOpenResult;
 import tauri.dev.jsg.stargate.network.SymbolInterface;
 import tauri.dev.jsg.stargate.network.SymbolTypeEnum;
 import tauri.dev.jsg.tileentity.dialhomedevice.DHDAbstractTile;
@@ -24,6 +25,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;
 import java.util.List;
+import java.util.Objects;
 
 import static net.minecraft.command.CommandBase.getListOfStringsMatchingLastWord;
 import static nex.jsgaddon.loader.FromFile.ADDRESS_MAP;
@@ -97,6 +99,7 @@ public class NoxCommand extends AbstractJSGACommand {
         }
         int time = 0;
         ((JSGACommand) baseCommand).sendRunningMess(sender, new TextComponentString("Dialing started: " + args[0]));
+        StargateClassicBaseTile foundGate = (StargateClassicBaseTile) Objects.requireNonNull(casted.getNetwork().getStargate(foundAddress)).getTileEntity();
         if (casted instanceof StargateUniverseBaseTile) {
             ((StargateUniverseBaseTile) casted).dialAddress(foundAddress.toImmutable(), foundAddress.size());
         } else {
@@ -126,12 +129,20 @@ public class NoxCommand extends AbstractJSGACommand {
                     casted.addSymbolToAddressDHD(casted.getSymbolType().getOrigin());
                     casted.addSymbolToAddressDHD(casted.getSymbolType().getBRB());
                 } else {
-                    casted.attemptOpenAndFail();
+                    StargateOpenResult r = casted.attemptOpenAndFail();
+                    if (r.ok()) {
+                        baseCommand.sendSuccessMess(sender, "Wormhole connected to " + args[0]);
+                    } else {
+                        if (foundGate.getStargateState().engaged() || foundGate.getStargateState().dialing())
+                            baseCommand.sendErrorMess(sender, "Wormhole signature detected at destination address!");
+                        else {
+                            baseCommand.sendErrorMess(sender, r.toString());
+                        }
+                    }
                 }
             }));
         }
     }
-
 
     @Nonnull
     @Override

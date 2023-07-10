@@ -129,7 +129,7 @@ dependencies {
 
     compileOnly "li.cil.oc:OpenComputers:MC1.12.2-1.7.5.213:api"
 
-    compileOnly files('E:\\IdeaProjects\\Sources\\jsg-1.12.2-4.11.1.0-lmao.jar')
+    compileOnly files('E:\\IdeaProjects\\Sources\\jsg-1.12.2-4.11.1.0-server.jar')
     /*implementation('org.gradle.Tau-ri-Dev:jsg') {
         version {
             branch = 'master'

@@ -1,5 +1,6 @@
 package nex.jsgaddon.command.stargate;
 
+import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.server.MinecraftServer;
@@ -56,7 +57,6 @@ public class AddAddress extends AbstractJSGACommand {
 
     @Override
     public void execute(@Nonnull MinecraftServer server, ICommandSender sender, @Nonnull String[] args) {
-
         File configFileOrDir = null;
         File configFile2 = new File(configFileOrDir, "config/jsgaddon/addaddress.json");
 
@@ -65,7 +65,7 @@ public class AddAddress extends AbstractJSGACommand {
             baseCommand.sendErrorMess(sender, "Can't find Stargate in your radius.");
             return;
         }
-        if (args.length < 1) {
+        if (args.length == 0) {
             baseCommand.sendUsageMess(sender, this);
             return;
         }
@@ -85,8 +85,10 @@ public class AddAddress extends AbstractJSGACommand {
         }
 
     }
-
+    public static final Gson gson = new GsonBuilder().setPrettyPrinting().create();
+        
     public void write(String name, StargateClassicBaseTile casted, File configFile2) throws IOException {
+
         Map<String, Map<String, ArrayList<String>>> ADDRESS_MAP_STRING = new HashMap<>();
         FileWriter writer = new FileWriter(configFile2, false);
 
@@ -104,7 +106,7 @@ public class AddAddress extends AbstractJSGACommand {
 
         ADDRESS_MAP_STRING.put(name, map);
 
-        writer.write(new GsonBuilder().setPrettyPrinting().create().toJson(ADDRESS_MAP_STRING));
+        writer.write(gson.toJson(ADDRESS_MAP_STRING));
         writer.close();
         ADDRESS_MAP_STRING.clear();
     }

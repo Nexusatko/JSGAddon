@@ -18,7 +18,7 @@ import tauri.dev.jsg.tileentity.stargate.StargateClassicBaseTile;
 
 import javax.annotation.Nonnull;
 import javax.annotation.ParametersAreNonnullByDefault;
-import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import static net.minecraft.command.CommandBase.getListOfStringsMatchingLastWord;
@@ -94,11 +94,11 @@ public class GateControl extends AbstractJSGACommand {
                 switch (args[1]) {
                     case "max":
                         energyStorage.setEnergyStored(energyStorage.getMaxEnergyStored());
-                        baseCommand.sendSuccessMess(sender, "Stargate's energy was set to full of capacity.");
+                        ((JSGACommand) baseCommand).sendSuccessMess(sender, new TextComponentString("Energy in Stargate's buffer was set to maximum of capacity."));
                         break;
                     case "half":
                         energyStorage.setEnergyStored(energyStorage.getMaxEnergyStoredInternally() / 2);
-                        ((JSGACommand) baseCommand).sendSuccessMess(sender, new TextComponentString("Stargate's energy was set to half of capacity."));
+                        ((JSGACommand) baseCommand).sendSuccessMess(sender, new TextComponentString("Energy in Stargate's buffer was set to half of capacity."));
                         break;
                     case "none":
                         energyStorage.setEnergyStored(0);
@@ -170,6 +170,6 @@ public class GateControl extends AbstractJSGACommand {
                 break;
 
         }
-        return new ArrayList<>();
+        return Collections.emptyList();
     }
 }

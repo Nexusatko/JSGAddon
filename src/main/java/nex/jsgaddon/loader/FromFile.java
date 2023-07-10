@@ -1,8 +1,8 @@
 package nex.jsgaddon.loader;
 
-import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
 import nex.jsgaddon.JSGAddon;
+import nex.jsgaddon.command.stargate.AddAddress;
 import tauri.dev.jsg.stargate.network.SymbolTypeEnum;
 
 import java.io.*;
@@ -29,33 +29,31 @@ public class FromFile {
                 JSGAddon.info("Config directory created!");
             }
             load(configDir, false);
-        }
-        catch (Exception e){
+        } catch (Exception e) {
             JSGAddon.logger.error(e);
         }
     }
 
-    public static void load(File configFileOrDir, boolean pathContainsFile) throws IOException {
+    public static void load(File configFileOrDir, boolean pathContainsFile) {
         ADDRESS_MAP.clear();
         ADDRESS_MAP_STRING.clear();
         if (!pathContainsFile) {
             configFile = new File(configFileOrDir, "jsgaddon/addresslist.json");
-        }
-        else {
+        } else {
             configFile = configFileOrDir;
         }
         try {
             Type mapType = new TypeToken<Map<String, Map<String, ArrayList<String>>>>() {
             }.getType();
-            ADDRESS_MAP_STRING = new GsonBuilder().create().fromJson(new FileReader(configFile), mapType);
+            ADDRESS_MAP_STRING = AddAddress.gson.fromJson(new FileReader(configFile), mapType);
 
-            for (String key : ADDRESS_MAP_STRING.keySet()) {
-                Map<String, ArrayList<String>> map = ADDRESS_MAP_STRING.get(key);
+            for (Map.Entry<String, Map<String, ArrayList<String>>> key : ADDRESS_MAP_STRING.entrySet()) {
+                Map<String, ArrayList<String>> map = key.getValue();
                 Map<String, JsonStargateAddress> newMap = new HashMap<>();
-                for (String sTypeString : map.keySet()) {
-                    newMap.put(sTypeString, new JsonStargateAddress(sTypeString, map.get(sTypeString)));
+                for (Map.Entry<String, ArrayList<String>> sTypeString : map.entrySet()) {
+                    newMap.put(sTypeString.getKey(), new JsonStargateAddress(sTypeString.getKey(), sTypeString.getValue()));
                 }
-                ADDRESS_MAP.put(key, newMap);
+                ADDRESS_MAP.put(key.getKey(), newMap);
             }
         } catch (FileNotFoundException e) {
             try {
@@ -85,6 +83,8 @@ public class FromFile {
         }
     }
 
+    private static final Random rand = new Random();
+
     public static void write() throws IOException {
         if (configFile == null) return;
         FileWriter writer = new FileWriter(configFile);
@@ -97,7 +97,6 @@ public class FromFile {
         for (int i = 0; i < 3; i++) {
             SymbolTypeEnum type = SymbolTypeEnum.valueOf(i);
             ArrayList<String> address = new ArrayList<>();
-            Random rand = new Random();
             for (int u = 0; u < 6; u++) {
                 address.add(type.getRandomSymbol(rand).getEnglishName());
             }
@@ -107,7 +106,7 @@ public class FromFile {
 
         ADDRESS_MAP_STRING.put("Example", map);
 
-        writer.write(new GsonBuilder().setPrettyPrinting().create().toJson(ADDRESS_MAP_STRING));
+        writer.write(AddAddress.gson.toJson(ADDRESS_MAP_STRING));
         writer.close();
         ADDRESS_MAP_STRING.clear();
     }
