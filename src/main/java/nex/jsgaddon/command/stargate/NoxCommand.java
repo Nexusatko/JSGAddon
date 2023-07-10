@@ -99,7 +99,12 @@ public class NoxCommand extends AbstractJSGACommand {
         }
         int time = 0;
         ((JSGACommand) baseCommand).sendRunningMess(sender, new TextComponentString("Dialing started: " + args[0]));
-        StargateClassicBaseTile foundGate = (StargateClassicBaseTile) Objects.requireNonNull(casted.getNetwork().getStargate(foundAddress)).getTileEntity();
+        StargatePos sg = casted.getNetwork().getStargate(foundAddress);
+        if(sg == null){
+            baseCommand.sendErrorMess(sender, "Can not find that stargate.");
+            return;
+        }
+        StargateClassicBaseTile foundGate = (StargateClassicBaseTile) sg.getTileEntity();
         if (casted instanceof StargateUniverseBaseTile) {
             ((StargateUniverseBaseTile) casted).dialAddress(foundAddress.toImmutable(), foundAddress.size());
         } else {
