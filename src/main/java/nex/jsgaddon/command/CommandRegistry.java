@@ -5,6 +5,7 @@ import net.minecraftforge.fml.common.Loader;
 import net.minecraftforge.fml.common.event.FMLServerStartingEvent;
 import net.minecraftforge.server.permission.DefaultPermissionLevel;
 import net.minecraftforge.server.permission.PermissionAPI;
+import nex.jsgaddon.command.ring.RingNearCommand;
 import nex.jsgaddon.command.stargate.*;
 
 import java.util.Arrays;
@@ -23,7 +24,8 @@ public class CommandRegistry {
             new DialCommand(),
             new DialGatesCommand(),
             new AddressReloadCommand(),
-            new TeleportCommand()
+            new TeleportCommand(),
+            new RingNearCommand()
     );
     public static void register(FMLServerStartingEvent event) {
         event.registerServerCommand(JSGACommand.INSTANCE);

@@ -25,4 +25,20 @@ public class FindNearestTile {
         }
         return tileEntity;
     }
+    public static TileEntity runByCLassRings(World world, BlockPos startPos, Class<? extends TileEntity> findByClass, int radiusXZ, int radiusY) {
+        BlockPos found = null;
+        TileEntity tileEntity = null;
+
+        ArrayList<BlockPos> blacklist = new ArrayList<>();
+        while (found == null) {
+            found = LinkingHelper.findClosestPos(world, startPos, new BlockPos(radiusXZ, radiusY, radiusXZ), JSGBlocks.RINGS_BLOCKS, blacklist);
+            if (found == null) break;
+            tileEntity = world.getTileEntity(found);
+            if (!findByClass.isInstance(tileEntity)) {
+                blacklist.add(found);
+                tileEntity = null;
+            }
+        }
+        return tileEntity;
+    }
 }
