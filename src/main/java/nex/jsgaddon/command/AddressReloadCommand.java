@@ -2,18 +2,17 @@ package nex.jsgaddon.command;
 
 import net.minecraft.command.ICommandSender;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.util.text.TextComponentString;
-import nex.jsgaddon.loader.FromFile;
+import nex.jsgaddon.loader.StargateAddressList;
 
 import javax.annotation.Nonnull;
 import javax.annotation.ParametersAreNonnullByDefault;
 import java.io.IOException;
 
-public class NoxReloadCommand extends AbstractJSGACommand {
+public class AddressReloadCommand extends AbstractJSGACommand {
     @Override
     @Nonnull
     public String getName() {
-        return "nox-reload";
+        return "reload-address";
     }
     @Nonnull
     @Override
@@ -24,23 +23,24 @@ public class NoxReloadCommand extends AbstractJSGACommand {
     @Nonnull
     @Override
     public String getGeneralUsage() {
-        return "nox-reload";
+        return "reload-address";
     }
 
     @Override
     public int getRequiredPermissionLevel() {
-        return 2;
+        return 4;
     }
 
     @Override
     @ParametersAreNonnullByDefault
     public void execute(MinecraftServer server, ICommandSender sender, String[] args) {
         try {
-            FromFile.reload();
+            StargateAddressList.reload();
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            baseCommand.sendErrorMess(sender, e.getMessage());
+            return;
         }
-        ((JSGACommand) baseCommand).sendSuccessMess(sender,new TextComponentString("Reloaded!"));
+        baseCommand.sendSuccessMess(sender, "Addresses successfully reloaded.");
 
     }
 }

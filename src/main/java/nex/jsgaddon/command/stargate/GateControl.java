@@ -12,11 +12,13 @@ import nex.jsgaddon.JSGAddon;
 import nex.jsgaddon.command.AbstractJSGACommand;
 import nex.jsgaddon.command.JSGACommand;
 import nex.jsgaddon.utils.FindNearestTile;
+import tauri.dev.jsg.api.controller.StargateClassicController;
 import tauri.dev.jsg.power.general.ItemEnergyStorage;
 import tauri.dev.jsg.power.general.LargeEnergyStorage;
 import tauri.dev.jsg.tileentity.stargate.StargateClassicBaseTile;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;
 import java.util.Collections;
 import java.util.List;
@@ -40,12 +42,12 @@ public class GateControl extends AbstractJSGACommand {
     @Nonnull
     @Override
     public String getGeneralUsage() {
-        return "gate <energy/iris/gen> (Just tab it)";
+        return "gate <status/energy/iris/gen> (Just tab it)";
     }
 
     @Override
     public int getRequiredPermissionLevel() {
-        return 2;
+        return 4;
     }
 
     @Override
@@ -66,14 +68,16 @@ public class GateControl extends AbstractJSGACommand {
             baseCommand.sendErrorMess(sender, "Can't find Stargate in your radius.");
             return;
         }
-        StargateClassicBaseTile casted = (StargateClassicBaseTile) tileEntity;
-        LargeEnergyStorage energyStorage = (LargeEnergyStorage) casted.getCapability(CapabilityEnergy.ENERGY, null);
-
+        StargateClassicBaseTile originGate = (StargateClassicBaseTile) tileEntity;
+        StargateClassicController originGateController = StargateClassicController.getController(originGate);
+        LargeEnergyStorage energyStorage = (LargeEnergyStorage) originGate.getCapability(CapabilityEnergy.ENERGY, null);
         switch (args[0]) {
+            case "status":
+
             case "energy":
                 if (energyStorage == null) return;
                 for (int i = 4; i <= 6; i++) {
-                    ItemStack stack = casted.getItemHandler().getStackInSlot(i);
+                    ItemStack stack = originGate.getItemHandler().getStackInSlot(i);
                     if (stack.isEmpty()) continue;
                     ItemEnergyStorage energy = (ItemEnergyStorage) stack.getCapability(CapabilityEnergy.ENERGY, null);
                     if (energy == null) continue;
@@ -94,11 +98,11 @@ public class GateControl extends AbstractJSGACommand {
                 switch (args[1]) {
                     case "max":
                         energyStorage.setEnergyStored(energyStorage.getMaxEnergyStored());
-                        ((JSGACommand) baseCommand).sendSuccessMess(sender, new TextComponentString("Energy in Stargate's buffer was set to maximum of capacity."));
+                        baseCommand.sendSuccessMess(sender, "Energy in Stargate's buffer was set to maximum of capacity.");
                         break;
                     case "half":
                         energyStorage.setEnergyStored(energyStorage.getMaxEnergyStoredInternally() / 2);
-                        ((JSGACommand) baseCommand).sendSuccessMess(sender, new TextComponentString("Energy in Stargate's buffer was set to half of capacity."));
+                        baseCommand.sendSuccessMess(sender, "Energy in Stargate's buffer was set to half of capacity.");
                         break;
                     case "none":
                         energyStorage.setEnergyStored(0);
@@ -111,30 +115,30 @@ public class GateControl extends AbstractJSGACommand {
             case "iris":
                 switch (args[1]) {
                     case "code":
-                        if (!casted.hasIris()) return;
-                        ((JSGACommand) baseCommand).sendInfoMess(sender, new TextComponentString(String.valueOf(casted.getIrisCode())));
+                        if (!originGate.hasIris()) return;
+                        ((JSGACommand) baseCommand).sendInfoMess(sender, new TextComponentString(String.valueOf(originGate.getIrisCode())));
                         break;
                     case "type":
-                        if (!casted.hasIris()) return;
-                        ((JSGACommand) baseCommand).sendInfoMess(sender, new TextComponentString(casted.getIrisType().toString()));
+                        if (!originGate.hasIris()) return;
+                        ((JSGACommand) baseCommand).sendInfoMess(sender, new TextComponentString(originGate.getIrisType().toString()));
 
                         break;
                     case "status":
                     case "state":
-                        if (!casted.hasIris()) return;
-                        ((JSGACommand) baseCommand).sendInfoMess(sender, new TextComponentString(casted.getIrisState().toString()));
+                        if (!originGate.hasIris()) return;
+                        ((JSGACommand) baseCommand).sendInfoMess(sender, new TextComponentString(originGate.getIrisState().toString()));
                         break;
                     case "toggle":
-                        if (casted.hasIris() && casted.isIrisClosed()) {
-                            casted.toggleIris();
+                        if (originGate.hasIris() && originGate.isIrisClosed()) {
+                            originGate.toggleIris();
                             ((JSGACommand) baseCommand).sendSuccessMess(sender, new TextComponentString("Iris was opened."));
-                        } else if (casted.hasIris() && casted.isIrisOpened()) {
-                            casted.toggleIris();
-                            ((JSGACommand) baseCommand).sendSuccessMess(sender, new TextComponentString("Iris was closed."));
-                        } else if (casted.hasIris()) {
-                            ((JSGACommand) baseCommand).sendErrorMess(sender, new TextComponentString("Iris is busy."));
+                        } else if (originGate.hasIris() && originGate.isIrisOpened()) {
+                            originGate.toggleIris();
+                            baseCommand.sendSuccessMess(sender, "Iris was closed.");
+                        } else if (originGate.hasIris()) {
+                            baseCommand.sendErrorMess(sender, "Iris is busy.");
                         } else {
-                            ((JSGACommand) baseCommand).sendErrorMess(sender, new TextComponentString("No Iris present!"));
+                            baseCommand.sendErrorMess(sender,"No Iris present!");
                         }
                         break;
                     case "default":
@@ -144,7 +148,7 @@ public class GateControl extends AbstractJSGACommand {
                 break;
             case "gen":
                 int amount = Integer.parseInt(args[1]);
-                casted.generateIncoming(amount, 9);
+                originGateController.generateIncomingWormhole(amount, 9, 0);
                 JSGAddon.info("Gen subsystem of GateControl was used by " + sender.getName() + "!");
                 break;
             default:
@@ -156,10 +160,13 @@ public class GateControl extends AbstractJSGACommand {
 
     @Nonnull
     @Override
-    public List<String> getTabCompletions(@Nonnull MinecraftServer server, @Nonnull ICommandSender sender, String[] args, BlockPos targetPos) {
+    public List<String> getTabCompletions(@Nonnull MinecraftServer server, @Nonnull ICommandSender sender, @Nonnull String[] args, @Nullable BlockPos targetPos) {
+        if (!checkPermission(server, sender)) {
+            return Collections.emptyList();
+        }
         switch (args.length) {
             case 1:
-                return getListOfStringsMatchingLastWord(args, "energy", "iris", "gen");
+                return getListOfStringsMatchingLastWord(args, "status", "energy", "iris", "gen");
             case 2:
                 switch (args[0]) {
                     case "energy":

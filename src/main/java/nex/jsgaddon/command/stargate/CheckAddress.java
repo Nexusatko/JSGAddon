@@ -8,20 +8,21 @@ import net.minecraft.util.math.BlockPos;
 import nex.jsgaddon.command.AbstractJSGACommand;
 import nex.jsgaddon.loader.JsonStargateAddress;
 import nex.jsgaddon.utils.FindNearestTile;
-import nex.jsgaddon.utils.GetRequiredEnergy;
 import tauri.dev.jsg.power.general.EnergyRequiredToOperate;
 import tauri.dev.jsg.stargate.StargateOpenResult;
+import tauri.dev.jsg.stargate.network.StargatePos;
 import tauri.dev.jsg.stargate.network.SymbolTypeEnum;
 import tauri.dev.jsg.tileentity.stargate.StargateClassicBaseTile;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
 import static net.minecraft.command.CommandBase.getListOfStringsMatchingLastWord;
-import static nex.jsgaddon.loader.FromFile.ADDRESS_MAP;
+import static nex.jsgaddon.loader.StargateAddressList.ADDRESS_MAP;
 
 public class CheckAddress extends AbstractJSGACommand {
 
@@ -42,7 +43,7 @@ public class CheckAddress extends AbstractJSGACommand {
     @Nonnull
     @Override
     public String getDescription() {
-        return "Checks status and availablity of the destination stargate by address";
+        return "Checks status and availability of the destination stargate by address";
     }
 
     @Nonnull
@@ -53,7 +54,7 @@ public class CheckAddress extends AbstractJSGACommand {
 
     @Override
     public int getRequiredPermissionLevel() {
-        return 2;
+        return 4;
     }
 
     @Override
@@ -78,15 +79,20 @@ public class CheckAddress extends AbstractJSGACommand {
             baseCommand.sendUsageMess(sender, this);
             return;
         }
-        StargateClassicBaseTile casted = (StargateClassicBaseTile) tileEntity;
-        JsonStargateAddress foundAddress = findAddress(args[0].replace("-", " "), casted.getSymbolType());
-        StargateClassicBaseTile foundGate = (StargateClassicBaseTile) Objects.requireNonNull(casted.getNetwork().getStargate(foundAddress)).getTileEntity();
+        StargateClassicBaseTile originGate = (StargateClassicBaseTile) tileEntity;
+
+        JsonStargateAddress foundAddress = findAddress(args[0].replace("-", " "), originGate.getSymbolType());
         if (foundAddress == null) {
             baseCommand.sendErrorMess(sender, "Invalid address name!");
             return;
         }
-        StargateOpenResult status = casted.checkAddressAndEnergy(foundAddress);
-        EnergyRequiredToOperate energy = GetRequiredEnergy.getEnergyRequiredToDial(Objects.requireNonNull(casted.getNetwork().getStargate(casted.getStargateAddress(casted.getSymbolType()))), Objects.requireNonNull(casted.getNetwork().getStargate(foundAddress)));
+        StargatePos foundGatePos = originGate.getNetwork().getStargate(foundAddress);
+        if (foundGatePos == null) return;
+        StargateClassicBaseTile foundGate = (StargateClassicBaseTile) Objects.requireNonNull(foundGatePos).getTileEntity();
+        if (foundGate == null) return;
+
+        StargateOpenResult status = originGate.checkAddressAndEnergy(foundAddress);
+        EnergyRequiredToOperate energy = originGate.getEnergyRequiredToDialForApi(foundGatePos);
         String name = String.format("Energy requirements and status for : §6" + args[0]);
         String requiredEnergy = String.format("§fRequired energy to dial §7: §e%,d §bRF", energy.energyToOpen);
         String keepEnergy = String.format("§fRequired energy to keep connection §7: §e%,d §bRF§7/§8t", energy.keepAlive);
@@ -103,7 +109,14 @@ public class CheckAddress extends AbstractJSGACommand {
 
     @Nonnull
     @Override
-    public List<String> getTabCompletions(@Nonnull MinecraftServer server, @Nonnull ICommandSender sender, @Nonnull String[] args, BlockPos targetPos) {
-        return getListOfStringsMatchingLastWord(args, ADDRESS_MAP.keySet());
+    public List<String> getTabCompletions(@Nonnull MinecraftServer server, @Nonnull ICommandSender sender, @Nonnull String[] args, @Nullable BlockPos targetPos) {
+        if (!checkPermission(server, sender)) {
+            return Collections.emptyList();
+        }
+        if (args.length == 1) {
+            return getListOfStringsMatchingLastWord(args, ADDRESS_MAP.keySet());
+        } else {
+            return Collections.emptyList();
+        }
     }
 }

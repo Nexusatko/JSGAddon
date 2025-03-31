@@ -5,7 +5,6 @@ import tauri.dev.jsg.stargate.network.SymbolInterface;
 import tauri.dev.jsg.stargate.network.SymbolTypeEnum;
 
 import java.util.ArrayList;
-import java.util.List;
 
 public class JsonStargateAddress extends StargateAddressDynamic {
     public JsonStargateAddress(String symbolType, ArrayList<String> symbols) {
@@ -30,7 +29,4 @@ public class JsonStargateAddress extends StargateAddressDynamic {
         return s.toString();
     }
 
-    public List<SymbolInterface> getAddress() {
-        return address;
-    }
 }

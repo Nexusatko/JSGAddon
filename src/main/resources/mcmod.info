@@ -2,7 +2,7 @@
   {
     "modid": "jsgaddon",
     "name": "JSGAddon",
-    "description": "Server-side addon for JSG coded for JSGCraft 2.0",
+    "description": "Server-side addon for JSG coded for Secrets of Avalon",
     "version": "${version}",
     "mcversion": "${mcversion}",
     "url": "",

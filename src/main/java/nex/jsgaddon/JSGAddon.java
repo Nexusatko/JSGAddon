@@ -7,9 +7,9 @@ import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.SidedProxy;
 import net.minecraftforge.fml.common.event.*;
 import nex.jsgaddon.command.CommandRegistry;
-import nex.jsgaddon.event.Chat;
-import nex.jsgaddon.event.Tick;
-import nex.jsgaddon.loader.FromFile;
+import nex.jsgaddon.event.*;
+import nex.jsgaddon.loader.StargateAddressList;
+import nex.jsgaddon.packet.JSGAddonPacketHandler;
 import nex.jsgaddon.proxy.IProxy;
 import org.apache.logging.log4j.Logger;
 
@@ -30,6 +30,7 @@ public class JSGAddon {
 
     public static Logger logger;
 
+
     public static final String CLIENT = "nex.jsgaddon.proxy.ProxyClient";
     public static final String SERVER = "nex.jsgaddon.proxy.ProxyServer";
 
@@ -47,10 +48,11 @@ public class JSGAddon {
     }
 
     @Mod.EventHandler
-    public void preInit(FMLPreInitializationEvent event) throws IOException {
+    public void preInit(FMLPreInitializationEvent event) {
         logger = event.getModLog();
         JSGAddon.proxy.preInit(event);
 
+        JSGAddonPacketHandler.registerPackets();
 
         Runtime.getRuntime().addShutdownHook(new Thread(JSGAddon::shutDown));
     }
@@ -60,17 +62,14 @@ public class JSGAddon {
         if (!Loader.isModLoaded("jsg")) {
             throw new LoaderException("JSG mod is required for JSGAddon.");
         }
-        //JSGAddon.proxy.init(event);
     }
 
     @Mod.EventHandler
     public void postInit(FMLPostInitializationEvent event) {
-        //JSGAddon.proxy.postInit(event);
     }
 
     @Mod.EventHandler
     public void serverStarting(FMLServerStartingEvent event) {
-        MinecraftForge.EVENT_BUS.register(new Tick());
         MinecraftForge.EVENT_BUS.register(new Chat());
         CommandRegistry.register(event);
         info("Commands registered!");
@@ -78,11 +77,11 @@ public class JSGAddon {
 
     @Mod.EventHandler
     public void serverStarted(FMLServerStartedEvent event) throws IOException {
-        FromFile.update();
+        StargateAddressList.update();
     }
 
+
     public static void shutDown() {
-        //JSGAddon.proxy.shutDown();
-        JSGAddon.info("I'm trying do prdele, where u going?!");
+        JSGAddon.info("I'm trying do prdele, where are you going?!");
     }
 }

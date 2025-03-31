@@ -8,7 +8,6 @@ import net.minecraft.util.text.TextComponentString;
 import nex.jsgaddon.command.AbstractJSGACommand;
 import nex.jsgaddon.command.JSGACommand;
 import nex.jsgaddon.utils.FindNearestTile;
-import tauri.dev.jsg.stargate.EnumIrisMode;
 import tauri.dev.jsg.stargate.EnumIrisState;
 import tauri.dev.jsg.stargate.network.StargatePos;
 import tauri.dev.jsg.tileentity.stargate.StargateAbstractBaseTile;
@@ -38,19 +37,20 @@ public class IrisBypassCommand extends AbstractJSGACommand {
 
     @Override
     public int getRequiredPermissionLevel() {
-        return 2;
+        return 4;
     }
 
     @Override
     @ParametersAreNonnullByDefault
     public void execute(MinecraftServer server, ICommandSender sender, String[] args) {
-        TileEntity tileEntity = null;
+        TileEntity tileEntity;
         if (args.length > 0) {
             EntityPlayer player = server.getPlayerList().getPlayerByUsername(args[0]);
             if (player != null) {
                 tileEntity = FindNearestTile.runByCLass(player.getEntityWorld(), player.getPosition(), StargateClassicBaseTile.class, 20, 20);
             } else {
                 ((JSGACommand) baseCommand).sendErrorMess(sender, new TextComponentString("Player is either invalid or not online."));
+                return;
             }
         } else {
             tileEntity = FindNearestTile.runByCLass(sender.getEntityWorld(), sender.getPosition(), StargateClassicBaseTile.class, 20, 20);
@@ -60,21 +60,18 @@ public class IrisBypassCommand extends AbstractJSGACommand {
             return;
         }
         if (tileEntity instanceof StargateClassicBaseTile) {
-            StargateClassicBaseTile casted = (StargateClassicBaseTile) tileEntity;
+            StargateClassicBaseTile originGate = (StargateClassicBaseTile) tileEntity;
 
-            StargatePos targetGate = casted.getNetwork().getStargate(casted.getDialedAddress());
+            StargatePos targetGate = originGate.getNetwork().getStargate(originGate.getDialedAddress());
             if (targetGate != null) {
                 StargateAbstractBaseTile targetTile = targetGate.getTileEntity();
                 if (targetTile instanceof StargateClassicBaseTile) {
-                    StargateClassicBaseTile castedTargetTile = (StargateClassicBaseTile) targetTile;
-                    if (!castedTargetTile.hasIris()) {
+                    StargateClassicBaseTile originGateTargetTile = (StargateClassicBaseTile) targetTile;
+                    if (!originGateTargetTile.hasIris()) {
                         ((JSGACommand) baseCommand).sendErrorMess(sender, new TextComponentString("Iris is not present, you can enter."));
-                    } else if (castedTargetTile.getIrisState() == EnumIrisState.CLOSED) {
-                        if (castedTargetTile.getIrisMode() == EnumIrisMode.CLOSED || castedTargetTile.getIrisMode() == EnumIrisMode.OC) {
-                            castedTargetTile.setIrisMode(EnumIrisMode.AUTO);
-                        }
-                        castedTargetTile.toggleIris();
-                        ((JSGACommand) baseCommand).sendSuccessMess(sender, new TextComponentString("Iris is now open!"));
+                    } else if (originGateTargetTile.getIrisState() == EnumIrisState.CLOSED || originGateTargetTile.getIrisState().equals(EnumIrisState.OPENING)) {
+                        originGateTargetTile.toggleIris();
+                        ((JSGACommand) baseCommand).sendSuccessMess(sender, new TextComponentString("Iris is now opening!"));
                     } else {
                         ((JSGACommand) baseCommand).sendErrorMess(sender, new TextComponentString("Iris is already open!"));
                     }

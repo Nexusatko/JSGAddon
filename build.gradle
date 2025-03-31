@@ -2,13 +2,12 @@ import org.apache.tools.ant.filters.ReplaceTokens
 
 plugins {
     id 'net.minecraftforge.gradle' version '5.1.+'
-    id "org.ajoberstar.grgit" version "3.1.1"
 }
 
 
 group = 'nex'
 version = "${mc_version}-${mod_version}"
-archivesBaseName = "${build_extrapath}jsg-addon"
+archivesBaseName = "${build_extrapath}jsgaddon"
 
 sourceSets {
     main {
@@ -110,26 +109,19 @@ repositories {
         name = "JitPack"
         url =  "https://jitpack.io" }
     maven {
-        name = "CommonCodec"
-        url = "https://mvnrepository.com/artifact/org.apache.httpcomponents/httpclient"
+        name = "Modrinth"
+        url = "https://api.modrinth.com/maven"
     }
-
-    jcenter()
 }
 
 
 dependencies {
     minecraft 'net.minecraftforge:forge:1.12.2-14.23.5.2860'
-
-    //implementation fg.deobf("cofh:RedstoneFlux:${rf_mc_version}-${rf_version}:universal")
-    //implementation fg.deobf("cofh:CoFHCore:${mc_version}-${cofh_core_version}:universal")
-
-    //compileOnly fg.deobf("mezz.jei:jei_${mc_version}:${jei_version}:api")
-    //runtimeOnly fg.deobf("mezz.jei:jei_${mc_version}:${jei_version}")
+    compileOnly 'maven.modrinth:forge-essentials:12.5.0'
+    compileOnly 'maven.modrinth:jsg:4.11.2.8'
 
     compileOnly "li.cil.oc:OpenComputers:MC1.12.2-1.7.5.213:api"
 
-    compileOnly files('E:\\IdeaProjects\\Sources\\jsg-1.12.2-4.11.1.0-server.jar')
     /*implementation('org.gradle.Tau-ri-Dev:jsg') {
         version {
             branch = 'master'

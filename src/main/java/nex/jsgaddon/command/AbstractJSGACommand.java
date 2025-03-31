@@ -1,8 +1,11 @@
 package nex.jsgaddon.command;
 
 import net.minecraft.command.ICommandSender;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.math.BlockPos;
+import net.minecraftforge.fml.common.Loader;
+import net.minecraftforge.server.permission.PermissionAPI;
 import tauri.dev.jsg.command.AbstractJSGCommand;
 
 import javax.annotation.Nonnull;
@@ -12,11 +15,12 @@ import java.util.Collections;
 import java.util.List;
 
 public abstract class AbstractJSGACommand extends AbstractJSGCommand {
-
     public AbstractJSGACommand() {
         super(JSGACommand.INSTANCE);
     }
-
+    private boolean permissionHandlerPresent() {
+        return Loader.isModLoaded("forgeessentials");
+    }
     @Nonnull
     @Override
     public String getUsage(@Nonnull ICommandSender sender) {
@@ -31,8 +35,13 @@ public abstract class AbstractJSGACommand extends AbstractJSGCommand {
     }
 
     @Override
-    public boolean checkPermission(@Nonnull MinecraftServer server, ICommandSender sender) {
-        return sender.canUseCommand(getRequiredPermissionLevel(), getName());
+    @ParametersAreNonnullByDefault
+    public boolean checkPermission(MinecraftServer server, ICommandSender sender) {
+        if (permissionHandlerPresent()) {
+            return PermissionAPI.hasPermission((EntityPlayer) sender.getCommandSenderEntity(), "jsgaddon" + "." + getName());
+        } else {
+            return sender.canUseCommand(getRequiredPermissionLevel(), getName());
+        }
     }
 
     @Nonnull
@@ -46,4 +55,5 @@ public abstract class AbstractJSGACommand extends AbstractJSGCommand {
     public boolean isUsernameIndex(@Nonnull String[] args, int index) {
         return false;
     }
+
 }
