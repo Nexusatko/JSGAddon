@@ -5,7 +5,7 @@
     "description": "Server-side addon for JSG coded for Secrets of Avalon",
     "version": "${version}",
     "mcversion": "${mcversion}",
-    "url": "",
+    "url": "https://www.curseforge.com/minecraft/mc-mods/jsgaddon",
     "updateUrl": "",
     "authorList": ["Nexusatko", "MineDragonCZ_"],
     "credits": "",
